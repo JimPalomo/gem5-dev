@@ -14,5 +14,5 @@ class Hello(SimObject):
     type = 'Hello'
     cxx_header = "tutorial/hello.hh"
 
-    time_to_wait = Param.Latenc("Time before firing the even")
-    number_of_fires = Param.Int(1, "Number of times to fire the event before goodbye")
+    time_to_wait = Param.Latency('2us', "Time before firing the event")
+    number_of_fires = Param.Int(10, "Number of times to fire the event before goodbye")

@@ -1,7 +1,6 @@
 #include "tutorial/hello.hh"
 #include "debug/HelloDebug.hh"
 
-
 Hello::Hello(HelloParams *params) : 
     SimObject(params), 
     event([this]{processEvent();}, 
