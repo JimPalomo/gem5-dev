@@ -1,0 +1,11 @@
+Import('*')
+
+SimObject('Hello.py')
+SimObject('Memobj.py')
+
+Source('hello.cc')
+Source('goodbye.cc')
+Source('memobj.cc')
+
+DebugFlag('HelloDebug')
+DebugFlag('Memobj')
