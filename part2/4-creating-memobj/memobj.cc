@@ -1,147 +1,131 @@
-#include "tutorial/memobj.hh"
-#include "debug/Memobj.hh"
+#ifndef __TUTORIAL_MEMOBJ_HH__
+#define __TUTORIAL_MEMOBJ_HH__
 
-Memobj::Memobj(MemobjParams *params) :
-    MemObject(params),
-    instPort(params->name + ".inst_port", this),
-    dataPort(params->name + ".data_port", this),
-    memPort(params->name + ".mem_side", this),
-    blocked(false)
-{}
+#include "mem/mem_object.hh"
+#include "params/Memobj.hh"
 
-Port &
-Memobj::getPort(const std::string &if_name, PortID idx) {
-    panic_if(idx != InvalidPortID, "This object doesn't support vector ports");
+// Creating a memory object that forwards requests and responses (no cache added)
+class Memobj : public MemObject {
+    private:
 
-    if (if_name == "mem_side") {
-        return memPort;
-    } else if (if_name == "inst_port") {
-        return instPort;
-    } else if (if_name == "data_port") {
-        return dataPort;
-    } else {
-        return MemObject::getPort(if_name, idx);
-    }
-}
+        // Receives requests and forwards those to the owner
+        class CPUSidePort : public SlavePort {
+            private: 
+                // Object owned by Memobj
+                Memobj *owner;
 
-void Memobj::CPUSidePort::sendPacket(PacketPtr pkt) {
-    panic_if(blockedPacket != nullptr, "Should never try to send if blocked!");
+                // Used to determine if a request needs to be resent (T = Y)
+                bool needRetry;
 
-    if (!sendTimingResp(pkt)) {
-        blockedPacket = pkt;
-    }
-}
+                // Stores one packet that is blocked
+                PacketPtr blockedPacket;
+    
+            public:
 
-AddrRangeList 
-Memobj::CPUSidePort::getAddrRanges() const {
-    return owner->getAddrRanges();
-}
+                // Constructor
+                CPUSidePort(const std::string& name, Memobj *owner) :
+                    SlavePort(name, owner),
+                    owner(owner),
+                    needRetry(false),
+                    blockedPacket(nullptr)
+                { }
 
-void Memobj::CPUSidePort::trySendRetry() {
-    if (needRetry && blockedPacket == nullptr) {
-        needRetry = false;
-        DPRINTF(Memobj, "Sending retry req for %d\n", id);
-        sendRetryReq();
-    }
-}
+                // Packets are sent from this port when called by the owner. Flow of packets are done here
+                void sendPacket(PacketPtr pkt);
 
-void Memobj::CPUSidePort::recvFunctional(PacketPtr pkt) {
-    return owner->handleFunctional(pkt);
-}
+                // Gathers list of address ranges which the owner is responsible for. Slave ports override this function to return a populated list (w/ one item at minimum)
+                AddrRangeList getAddrRanges() const override;
 
-bool Memobj::CPUSidePort::recvTimingReq(PacketPtr pkt) {
-    if (!owner->handleRequest(pkt)) {
-        needRetry = true;
-        return false;
-    } else {
-        return true;
-    }
-}
+                // Send a retry to a nearby port if Memobj whenever is not blocked
+                void trySendRetry();
 
-void Memobj::CPUSidePort::recvRespRetry() {
-    assert(blockedPacket != nullptr);
+            protected:
 
-    PacketPtr pkt = blockedPacket;
-    blockedPacket = nullptr;
+                // Receives atomic packet requested by the master port (Used for atomic requests, faster version of timing mode, not used in this memobj)
+                Tick recvAtomic(PacketPtr pkt) override {
+                    panic("recvAtomic unimpl.");
+                }
 
-    sendPacket(pkt);
-}
+                // Receives functional packet requested by master port (Used for functional requests, for debugging purposes)
+                void recvFunctional(PacketPtr pkt) override;
 
-// Huge error occurred after fixing this line
-void Memobj::MemSidePort::sendPacket(PacketPtr pkt) {
-    panic_if(blockedPacket != nullptr, "Should never try to send if blocked!");
+                // Receives timing request from master port
+                bool recvTimingReq(PacketPtr pkt) override;
 
-    if (!sendTimingReq(pkt)) {
-        blockedPacket = pkt;
-    }
-}
+                // Called by master port if sendTimingResp was called on this specific slave port
+                void recvRespRetry() override;
 
-bool Memobj::MemSidePort::recvTimingResp(PacketPtr pkt) {
-    return owner->handleResponse(pkt);
-}
+        };
 
-void Memobj::MemSidePort::recvReqRetry() {
-    assert(blockedPacket != nullptr);
+        // Port on memory-side (receives responses but forwards msot of the requests to owner)
+        class MemSidePort : public MasterPort {
+            private:
+                
+                // Object owned by Memobj
+                Memobj *owner;
 
-    PacketPtr pkt = blockedPacket;
-    blockedPacket = nullptr;
+                // Stores blocked packet
+                PacketPtr blockedPacket;
 
-    sendPacket(pkt);
-}
+            public:
+                
+                // Constructor
+                MemSidePort(const std::string& name, Memobj *owner) :
+                    MasterPort(name, owner),
+                    owner(owner),
+                    blockedPacket(nullptr)
+                    { }
 
-void Memobj::MemSidePort::recvRangeChange() {
-    owner->sendRangeChange();
-}
+                // Sends packets through this port and is called by the owner
+                void sendPacket(PacketPtr pkt);
 
-bool Memobj::handleRequest(PacketPtr pkt) {
-    if (blocked) {
-        return false;
-    }
+            protected:
 
-    DPRINTF(Memobj, "Got request for addr %#x\n", pkt->getAddr());
+                // Receive a timing response (from slave port)
+                bool recvTimingResp(PacketPtr pkt) override;
 
-    blocked = true;
+                // Called by slave port (if sendTimingReq called on this master port)
+                void recvReqRetry() override;
 
-    memPort.sendPacket(pkt);
+                // Receives address ranges from peer slave port
+                void recvRangeChange() override;
+        };
 
-    return true;
-}
+        // Handles requests on the CPU-side
+        bool handleRequest(PacketPtr pkt);
 
-bool Memobj::handleResponse(PacketPtr pkt) {
-    assert(blocked);
+        // Handles responses from memory side
+        bool handleResponse(PacketPtr pkt);
 
-    DPRINTF(Memobj, "Got response for addr %#x\n", pkt->getAddr());
+        // Handles functional packets (debugging purposes)
+        void handleFunctional(PacketPtr pkt);
 
-    blocked = false;
+        // Returns address ranges 
+        AddrRangeList getAddrRanges() const;
 
-    if (pkt->req->isInstFetch()) {
-        instPort.sendPacket(pkt);
-    } else {
-        dataPort.sendPacket(pkt);
-    }
+        // Requests for memory ranges
+        void sendRangeChange();
 
-    instPort.trySendRetry();
-    dataPort.trySendRetry();
+        // Instantiation of CPU-side ports
+        CPUSidePort instPort;
+        CPUSidePort dataPort;
 
-    return true;
-}
+        // Instantiation of memory-side port
+        MemSidePort memPort;
 
-void Memobj::handleFunctional(PacketPtr pkt) {
-    memPort.sendFunctional(pkt);
-}
+        // If blocked requests is present, then wait for a response
+        bool blocked;
 
-AddrRangeList
-Memobj::getAddrRanges() const {
-    DPRINTF(Memobj, "Sending new ranges\n");
-    return memPort.getAddrRanges();
-}
+    public:
 
-void Memobj::sendRangeChange() {
-    instPort.sendRangeChange();
-    dataPort.sendRangeChange();
-}
+        // Constructor
+        Memobj(MemobjParams *params);
+        
+        // Get port information when given a name & index
+        Port &getPort(const std::string &if_name, PortID idx=InvalidPortID) override;
+};
 
-Memobj*
-MemobjParams::create() {
-    return new Memobj(this);
-}
+
+
+#endif // __TUTORIAL_SIMPLE_MEMOBJ_HH__
+

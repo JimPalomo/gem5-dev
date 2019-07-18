@@ -1,0 +1,14 @@
+Import('*')
+
+SimObject('Hello.py')
+SimObject('Memobj.py')
+SimObject('Cache.py')
+
+Source('hello.cc')
+Source('goodbye.cc')
+Source('memobj.cc')
+Source('cache.cc')
+
+DebugFlag('HelloDebug')
+DebugFlag('Memobj')
+DebugFlag('CacheDebug')
