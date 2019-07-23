@@ -2,12 +2,12 @@ Import('*')
 
 SimObject('Hello.py')
 SimObject('Memobj.py')
-SimObject('CacheObj.py')
+SimObject('SimpleCache.py')
 
 Source('hello.cc')
 Source('goodbye.cc')
 Source('memobj.cc')
-Source('cache_obj.cc')
+Source('simple_cache.cc')
 
 DebugFlag('HelloDebug')
 DebugFlag('Memobj')

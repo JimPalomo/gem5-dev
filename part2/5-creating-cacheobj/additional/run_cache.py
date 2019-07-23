@@ -14,7 +14,7 @@ system.cpu = TimingSimpleCPU()
 
 system.membus = SystemXBar()
 
-system.cache = CacheObj(size ='1kB')
+system.cache = SimpleCache(size ='1kB')
 
 system.cpu.icache_port = system.cache.cpu_side 
 system.cpu.dcache_port = system.cache.cpu_side

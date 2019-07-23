@@ -2,6 +2,7 @@
 #define __TUTORIAL_MEMOBJ_HH__
 
 #include "mem/mem_object.hh"
+// #include "tutorial/memobj.hh"
 #include "params/Memobj.hh"
 
 class Memobj : public MemObject {

@@ -1,9 +1,9 @@
-#include "tutorial/cache.hh"
+#include "tutorial/cache_obj.hh"
 #include "base/random.hh"
 #include "debug/CacheDebug.hh"
 #include "sim/system.hh"
 
-Cache::Cache(CacheParams *params) :
+CacheObj::CacheObj(CacheObjParams *params) :
     MemObject(params),
     latency(params->latency),
     blockSize(params->system->cacheLineSize()),
@@ -19,7 +19,7 @@ Cache::Cache(CacheParams *params) :
 }
 
 Port &
-Cache::getPort(const std::string &if_name, PortID idx) {
+CacheObj::getPort(const std::string &if_name, PortID idx) {
     if (if_name == "mem_side") {
         panic_if(idx != InvalidPortID, "Mem side of simple cache not a vector port");
         return memPort;
@@ -30,7 +30,7 @@ Cache::getPort(const std::string &if_name, PortID idx) {
     }
 }
 
-void Cache::CPUSidePort::sendPacket(PacketPtr pkt) {
+void CacheObj::CPUSidePort::sendPacket(PacketPtr pkt) {
     panic_if(blockedPacket != nullptr, "Should never try to send if blocked!");
 
     DPRINTF(CacheDebug, "Sending %s to CPU\n", pkt->print());
@@ -41,11 +41,11 @@ void Cache::CPUSidePort::sendPacket(PacketPtr pkt) {
 }
 
 AddrRangeList
-Cache::CPUSidePort::getAddrRanges() const {
+CacheObj::CPUSidePort::getAddrRanges() const {
     return owner->getAddrRanges();
 }
 
-void Cache::CPUSidePort::trySendRetry() {
+void CacheObj::CPUSidePort::trySendRetry() {
     if (needRetry && blockedPacket == nullptr) {
         needRetry = false;
         DPRINTF(CacheDebug, "Sending retry req.\n");
@@ -53,11 +53,11 @@ void Cache::CPUSidePort::trySendRetry() {
     }
 }
 
-void Cache::CPUSidePort::recvFunctional(PacketPtr pkt) {
+void CacheObj::CPUSidePort::recvFunctional(PacketPtr pkt) {
     return owner->handleFunctional(pkt);
 }
 
-bool Cache::CPUSidePort::recvTimingReq(PacketPtr pkt) {
+bool CacheObj::CPUSidePort::recvTimingReq(PacketPtr pkt) {
     DPRINTF(CacheDebug, "Got request %s\n", pkt->print());
 
     if (blockedPacket || needRetry) {
@@ -76,7 +76,7 @@ bool Cache::CPUSidePort::recvTimingReq(PacketPtr pkt) {
     }
 }
 
-void Cache::CpuSidePort::recvRespRetry() {
+void CacheObj::CPUSidePort::recvRespRetry() {
     assert(blockedPacket != nullptr);
 
     PacketPtr pkt = blockedPacket;
@@ -89,7 +89,7 @@ void Cache::CpuSidePort::recvRespRetry() {
     trySendRetry();
 }
 
-void Cache::MemSidePort::sendPacket(PacketPtr pkt) {
+void CacheObj::MemSidePort::sendPacket(PacketPtr pkt) {
     panic_if(blockedPacket != nullptr, "Should never try to send if blocked!");
 
     if (!sendTimingReq(pkt)) {
@@ -97,11 +97,11 @@ void Cache::MemSidePort::sendPacket(PacketPtr pkt) {
     }
 }
 
-bool Cache::MemSidePort::recvTimingResp(PacketPtr pkt) {
+bool CacheObj::MemSidePort::recvTimingResp(PacketPtr pkt) {
     return owner->handleResponse(pkt);
 }
 
-void Cache::MemSidePort::recvReqRetry() {
+void CacheObj::MemSidePort::recvReqRetry() {
     assert(blockedPacket != nullptr);
     
     PacketPtr pkt = blockedPacket;
@@ -110,11 +110,11 @@ void Cache::MemSidePort::recvReqRetry() {
     sendPacket(pkt);
 }
 
-void Cache::MemSidePort::recvRangeChange() {
+void CacheObj::MemSidePort::recvRangeChange() {
     owner->sendRangeChange();
 }
 
-bool Cache::handleRequest(PacketPtr pkt, int port_id) {
+bool CacheObj::handleRequest(PacketPtr pkt, int port_id) {
     if (blocked) {
         return false;
     }
@@ -126,12 +126,12 @@ bool Cache::handleRequest(PacketPtr pkt, int port_id) {
     assert(waitingPortId == -1);
     waitingPortId = port_id;
 
-    schedule(new EventFunctionWrapper([this, pkt]{ accessTiming(pkt);}, name() + ".accessEvent", true), clockedEdge(latency));
+    schedule(new EventFunctionWrapper([this, pkt]{ accessTiming(pkt);}, name() + ".accessEvent", true), clockEdge(latency));
 
     return true;
 }
 
-bool Cache::handleResponse(PacketPtr pkt) {
+bool CacheObj::handleResponse(PacketPtr pkt) {
     assert(blocked);
     DPRINTF(CacheDebug, "Got response for addr %#x\n", pkt->getAddr());
 
@@ -156,7 +156,7 @@ bool Cache::handleResponse(PacketPtr pkt) {
     return true;
 }
 
-void Cache::sendResponse(PacketPtr pkt) {
+void CacheObj::sendResponse(PacketPtr pkt) {
     assert(blocked);
     DPRINTF(CacheDebug, "Sending resp for addr %#x\n", pkt->getAddr());
 
@@ -172,7 +172,7 @@ void Cache::sendResponse(PacketPtr pkt) {
     }
 }
 
-void Cache::handleFunctional(PacketPtr pkt) {
+void CacheObj::handleFunctional(PacketPtr pkt) {
     if (accessFunctional(pkt)) {
         pkt->makeResponse(); 
     } else {
@@ -180,14 +180,14 @@ void Cache::handleFunctional(PacketPtr pkt) {
     }
 }
 
-void Cache::accessTiming(PacketPtr pkt) {
+void CacheObj::accessTiming(PacketPtr pkt) {
     bool hit = accessFunctional(pkt);
 
     DPRINTF(CacheDebug, "%s for packet: %s\n", hit ? "Hit" : "Miss", pkt->print());
 
     if (hit) {
         hits++;
-        DDUMP(Cache, pkt->getConstPtr<uint8_t>(), pkt->getSize());
+        DDUMP(CacheDebug, pkt->getConstPtr<uint8_t>(), pkt->getSize());
         pkt->makeResponse();
         sendResponse(pkt);
     } else {
@@ -224,7 +224,7 @@ void Cache::accessTiming(PacketPtr pkt) {
     }
 }
 
-bool Cache::accessFunctional(PacketPtr pkt) {
+bool CacheObj::accessFunctional(PacketPtr pkt) {
     Addr block_addr = pkt->getBlockAddr(blockSize);
     auto it = cacheStore.find(block_addr);
 
@@ -241,7 +241,7 @@ bool Cache::accessFunctional(PacketPtr pkt) {
     return false;
 }
 
-void Cache::insert(PacketPtr pkt) {
+void CacheObj::insert(PacketPtr pkt) {
     assert(pkt->getAddr() == pkt->getBlockAddr(blockSize));
 
     assert(cacheStore.find(pkt->getAddr()) == cacheStore.end());
@@ -281,19 +281,19 @@ void Cache::insert(PacketPtr pkt) {
 }
 
 AddrRangeList 
-Cache::getAddrRanges() const {
+CacheObj::getAddrRanges() const {
     DPRINTF(CacheDebug, "Sending new ranges\n");
 
     return memPort.getAddrRanges();
 }
 
-void Cache::sendRangeChange() const {
+void CacheObj::sendRangeChange() const {
     for (auto& port : cpuPorts) {
         port.sendRangeChange();
     }
 }
 
-void Cache::regStats() {
+void CacheObj::regStats() {
     MemObject::regStats();
 
     hits.name(name() + ".hits").desc("Number of hits");
@@ -307,7 +307,7 @@ void Cache::regStats() {
     hitRatio = hits / (hits + misses);
 }
 
-Cache*
-CacheParams::create() {
-    return new Cache(this);
+CacheObj*
+CacheObjParams::create() {
+    return new CacheObj(this);
 }

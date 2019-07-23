@@ -1,24 +1,25 @@
-#ifndef __TUTORIAL_CACHE_HH__
-#define __TUTORIAL_CACHE_HH__
+#ifndef __TUTORIAL_CACHE_OBJ_HH__
+#define __TUTORIAL_CACHE_OBJ_HH__
 
 #include <unordered_map>
-#include "mem/memobj.hh"
-#include "params/Cache.hh"
+//#include "tutorial/memobj.hh"
+#include "mem/mem_object.hh"
+#include "params/CacheObj.hh"
 
-class Cache : MemObject {
+class CacheObj : public MemObject {
     private:
         class CPUSidePort : public SlavePort {
             private: 
                 int id;
 
-                Cache *owner;
+                CacheObj *owner;
 
                 bool needRetry;
 
                 PacketPtr blockedPacket;
 
             public:
-                CPUSidePort(const std:: string& name, int id, Cache *owner) :
+                CPUSidePort(const std::string& name, int id, CacheObj *owner) :
                     SlavePort(name, owner),
                     id(id),
                     owner(owner),
@@ -34,7 +35,7 @@ class Cache : MemObject {
 
             protected:
                 Tick recvAtomic(PacketPtr pkt) override {
-                    panic("recvAtomic unimpl");
+                    panic("recvAtomic unimpl.");
                 }
 
                 void recvFunctional(PacketPtr pkt) override;
@@ -46,12 +47,12 @@ class Cache : MemObject {
 
         class MemSidePort : public MasterPort {
             private:
-                Cache *owner;
+                CacheObj *owner;
 
                 PacketPtr blockedPacket;
             
             public:
-                MemSidePort(const std::string& name, Cache *owner) :
+                MemSidePort(const std::string& name, CacheObj *owner) :
                     MasterPort(name, owner), 
                     owner(owner), 
                     blockedPacket(nullptr)
@@ -111,12 +112,12 @@ class Cache : MemObject {
         Stats::Formula hitRatio;
 
     public:
-        Cache(CacheParams *params);
+        CacheObj(CacheObjParams *params);
 
-        Port &getPort(const std::string& if_name, PortID idx = InvalidPortID) override;
+        Port &getPort(const std::string &if_name, PortID idx = InvalidPortID) override;
 
         void regStats() override;
 
 };
 
-#endif // __TUTORIAL_CACHE_HH__
+#endif // __TUTORIAL_CACHE_OBJ_HH__

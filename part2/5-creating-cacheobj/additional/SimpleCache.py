@@ -1,10 +1,10 @@
 from m5.params import *
 from m5.proxy import *
-from MemObject import MemObject
+from m5.objects.MemObject import MemObject
 
-class Cache(MemObject):
-    type = 'Cache'
-    cxx_header = "tutorial/cache.hh"
+class SimpleCache(MemObject):
+    type = 'SimpleCache'
+    cxx_header = "tutorial/simple_cache.hh"
 
     cpu_side = VectorSlavePort("CPU side port, receives requests")
     mem_side = MasterPort("Memory side port, sends requests")
