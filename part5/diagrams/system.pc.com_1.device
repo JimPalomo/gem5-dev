@@ -1,0 +1,18 @@
+Linux version 2.6.22.9 (blackga@nacho) (gcc version 4.1.2 (Gentoo 4.1.2)) #2 Mon Oct 8 13:13:00 PDT 2007
+Command line: earlyprintk=ttyS0 console=ttyS0 lpj=7999923 root=/dev/hda1
+BIOS-provided physical RAM map:
+ BIOS-e820: 0000000000000000 - 000000000009fc00 (usable)
+ BIOS-e820: 000000000009fc00 - 0000000000100000 (reserved)
+ BIOS-e820: 0000000000100000 - 0000000020000000 (usable)
+ BIOS-e820: 0000000020000000 - 00000000c0000000 (reserved)
+ BIOS-e820: 00000000ffff0000 - 0000000100000000 (reserved)
+end_pfn_map = 1048576
+kernel direct mapping tables up to 100000000 @ 8000-d000
+DMI 2.5 present.
+Zone PFN ranges:
+  DMA             0 ->     4096
+  DMA32        4096 ->  1048576
+  Normal    1048576 ->  1048576
+early_node_map[2] active PFN ranges
+    0:        0 ->      159
+    0:      256 ->   131072
