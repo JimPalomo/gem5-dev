@@ -1,6 +1,6 @@
 # gem5-dev
 
-Work done in gem5
+gem5 is an open simulation platform for computer-system architecture research. gem5 consists of replicating systems through emulated simulation and full system simulation. gem5 is used to study the run times of simulated hardware and programs.
 
 <br>
 
