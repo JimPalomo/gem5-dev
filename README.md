@@ -18,5 +18,8 @@ gem5 is an open simulation platform for computer-system architecture research. g
 5. Run the system emulation or full system emulation by starting with build/x86/gem5.opt [debug flags] [file directory]<br>
 	Ex. build/X86/gem5.opt --debug-flags=CacheDebug src/tutorial/run_cache.py
 
+> easy install by running install.sh shell script
+> 1. Authorize shell script install.sh by `chmod 755 install.sh` and run by `./install.sh`
+
 ## Still creating
 Going to create shell scripts to easily run and install gem5
