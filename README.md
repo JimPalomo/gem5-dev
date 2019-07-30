@@ -4,8 +4,8 @@ gem5 is an open simulation platform for computer-system architecture research. g
 > Files are broken down into parts which covers the following: 
 > 1. Part 1: Creating a simple configuration script and adding cache objects to the config script.
 > 2. Part 2: Creating a SimObject, event-driven programming, adding-parameters, creating memory objects, creating cache objects.
-> 3. Part 5: Full System Simulation, create a full system (fs mode) which relays back more accurate run times than System Emulation (se mode). FE mode takes longer to establish than that of SE mode when it comes to processing thousands to millions of requests (can take hours to days to setup).
-> Notes: Part 3 (Modeling cache coherence with Ruby) & 4 (CPU Models) are more in depth learning modules that were skipped due to time constraints.
+> 3. Part 5: Full System Simulation, create a full system (fs mode) which relays back more accurate run times than System Emulation (se mode). FE mode takes longer to establish than that of SE mode when it comes to processing thousands to millions of requests (can take hours to days to setup). Every part before part 5 is done under SE mode. <br>
+> Notes: Part 3 (Modeling cache coherence with Ruby) & 4 (CPU Models) are more in depth learning modules that were skipped due to time constraints. [test]
 
 <br>
 
