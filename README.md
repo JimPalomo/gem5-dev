@@ -1,11 +1,11 @@
-# gem5-dev
+# Developing gem5
+gem5 is an open simulation platform for computer-system architecture research. gem5 consists of replicating systems through emulated simulation and full system simulation. gem5 is used to study the run times of simulated hardware and programs.
 
-Work done in gem5
 > Files are broken down into parts which covers the following: 
 > 1. Part 1: Creating a simple configuration script and adding cache objects to the config script.
 > 2. Part 2: Creating a SimObject, event-driven programming, adding-parameters, creating memory objects, creating cache objects.
 > 3. Part 5: Full System Simulation, create a full system (fs mode) which relays back more accurate run times than System Emulation (se mode). FE mode takes longer to establish than that of SE mode when it comes to processing thousands to millions of requests (can take hours to days to setup).
-> Note: Part 3 (Modeling cache coherence with Ruby) & 4 (CPU Models) are more in depth learning modules that were skipped due to time constraints.
+> Notes: Part 3 (Modeling cache coherence with Ruby) & 4 (CPU Models) are more in depth learning modules that were skipped due to time constraints.
 
 <br>
 
