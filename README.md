@@ -22,7 +22,7 @@ gem5 is an open simulation platform for computer-system architecture research. g
 > 1. Authorize shell script install.sh by `chmod 755 install.sh` and run by `./install.sh`
 
 ## Architecture Diagrams
-To add the architecture diagrams you must have pip installed and install pydot -> code `pip install pydot`. 
+To add the architecture diagrams you must have pip installed and install pydot -> `pip install pydot`. 
 <br>
 Note: diagrams are created under the m5out file after a scons rebuild -> `scons build/X86/gem5.opt` (X86 for 64 bit architecture, different for each computer). 
 
