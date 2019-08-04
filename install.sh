@@ -12,10 +12,11 @@ sudo apt-get install scons
 sudo apt-get install python dev
 sudo apt-get install libprotobuf-dev python-protobuf protobuf-compiler libgoogle-perftools-dev
 git clone https://gem5.googlesource.com/public/gem5
+
+cd gem5
 scons build/X86/gem5.opt -j3 #3 cores + 1
 
-cd
-cd gem5/src/
+cdsrc/
 mkdir tutorial
 cd tutorial
 
