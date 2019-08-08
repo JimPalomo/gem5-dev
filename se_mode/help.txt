@@ -1,0 +1,60 @@
+Different parameter options for SE MODE
+
+
+>> E.g. build/X86/gem5.opt configs/example/se.py --cache
+
+
+'
+--cpu-type = CPU_type
+Set the type of CPU, timing, atomic, functional
+
+
+--sys-clock = Sys_clock
+Set the clock speed for the system
+
+
+--cpu-clock = CPU_clock
+Set the clock speed for the CPU
+
+
+--mem-type = Mem_type
+Type of DDR memories + ruby mem controller
+
+
+--caches
+Enables cache is activated (classic)
+
+
+--l2cache
+Enables L2 cache (when classic cache is active)
+
+
+--ruby
+Switch cache system to ruby from classic
+
+
+--m = Ticks, --abs-max-ticks = Ticks
+Run specified ticks (limit simulation time)
+
+
+--I = Maxinsts
+Represents the total amount of instructions to simulate (default: infinite)
+
+
+-c = CMD, --cmd = CMD
+Runs the binary in syscall emu_mode
+
+
+-o = Options, --options = Options
+Passes arguments to variables that have options
+
+
+-output = Output
+Redirects stdout to a file instead of the terminal
+
+
+--errout = Errout
+Redirects stderr to a file
+
+
+'
