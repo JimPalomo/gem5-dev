@@ -3,11 +3,11 @@
 cd 
 cd gem5
 
-<< listOfCPU
+# << listOfCPU
 echo "Listing CPU types"
 build/X86/gem5.opt configs/example/se.py  \
 --list-cpu-types
-listOfCPU
+# listOfCPU
 
 << atomic
 echo "Testing AtomicSimpleCPU"
