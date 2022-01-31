@@ -30,9 +30,15 @@ Note: diagrams are created under the m5out file after a scons rebuild -> `scons 
 Must scons rebuild `scons build.X86/gem5.opt` after creating new configuration files.
 
 ## My Internship Report
-https://jimpalomo.github.io/internship_report.pdf
+https://github.com/JimPalomo/gem5-dev/blob/master/assets/internship_report.pdf
 
 ## Common Issues
 When running gem5, scons rebuild can not figure out specified members. This is due to a newer compiler version and an older version of gem5. Basically, the two are out of sync. 
 <br>https://gem5-users.gem5.narkive.com/lHPinJyI/error-isafakeparams-has-no-member-named-fake-mem
 <br>https://github.com/estwings57/CasHMC/issues/6
+
+## Example System Diagrams
+- Full System Diagram: https://github.com/JimPalomo/gem5-dev/blob/master/assets/gem5_diagram2.pdf
+
+- Sample below
+![alt text](https://github.com/JimPalomo/gem5-dev/blob/master/assets/gem5_diagram.png) 
